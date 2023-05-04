@@ -692,8 +692,11 @@ class VoiceClient(VoiceProtocol):
             return
         if self.paused:
             return
-
-        data = RawData(data, self)
+        try:
+            data = RawData(data, self)
+        except nacl.exceptions.CryptoError:
+            print("Skipping packet due to decryption failure.")
+            return
 
         if data.decrypted_data == b"\xf8\xff\xfe":  # Frame of silence
             return
@@ -855,6 +858,9 @@ class VoiceClient(VoiceProtocol):
 
         self.user_timestamps.update({data.ssrc: (data.timestamp, data.receive_time)})
 
+        # I don't want to add silence
+        print("Removing silence")
+        silence = 0
         data.decoded_data = (
             struct.pack("<h", 0) * max(0, int(silence)) * opus._OpusStruct.CHANNELS
             + data.decoded_data
