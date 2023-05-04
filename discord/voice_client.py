@@ -859,7 +859,6 @@ class VoiceClient(VoiceProtocol):
         self.user_timestamps.update({data.ssrc: (data.timestamp, data.receive_time)})
 
         # I don't want to add silence
-        print("Removing silence")
         silence = 0
         data.decoded_data = (
             struct.pack("<h", 0) * max(0, int(silence)) * opus._OpusStruct.CHANNELS
